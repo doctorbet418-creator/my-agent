@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>סוכן וואטסאפ שלי</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --card: #1e1e1e;
+      --border: #2a2a2a;
+      --green: #25d366;
+      --green-dim: #1a9e4a;
+      --text: #f0f0f0;
+      --muted: #777;
+      --red: #e05a5a;
+      --yellow: #f0c040;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Heebo', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+
+    /* bot toggle */
+    .bot-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .switch {
+      position: relative; display: inline-block;
+      width: 48px; height: 26px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer;
+      inset: 0; background: #333; border-radius: 34px;
+      transition: .3s;
+    }
+    .slider:before {
+      position: absolute; content: "";
+      height: 18px; width: 18px;
+      right: 4px; bottom: 4px;
+      background: white; border-radius: 50%;
+      transition: .3s;
+    }
+    input:checked + .slider { background: var(--green); }
+    input:checked + .slider:before { transform: translateX(-22px); }
+
+    /* ── Tabs ── */
+    nav {
+      display: flex;
+      gap: 0;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+    }
+    .tab {
+      padding: 14px 22px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      transition: all .2s;
+      user-select: none;
+    }
+    .tab.active {
+      color: var(--green);
+      border-bottom-color: var(--green);
+    }
+    .tab:hover:not(.active) { color: var(--text); }
+
+    /* ── Layout ── */
+    main { max-width: 780px; margin: 0 auto; padding: 32px 20px; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* ── Inputs ── */
+    textarea, input[type="text"] {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Heebo', sans-serif;
+      font-size: 15px;
+      padding: 14px 16px;
+      resize: vertical;
+      outline: none;
+      transition: border-color .2s;
+    }
+    textarea:focus, input[type="text"]:focus {
+      border-color: var(--green);
+    }
+    textarea { min-height: 80px; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: 10px;
+      font-family: 'Heebo', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all .2s;
+    }
+    .btn-green { background: var(--green); color: #000; }
+    .btn-green:hover { background: #1fc55a; transform: translateY(-1px); }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover { border-color: var(--green); color: var(--green); }
+    .btn-red { background: transparent; border: 1px solid var(--red); color: var(--red); }
+    .btn-red:hover { background: var(--red); color: #fff; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+    /* ── Chat bubble area ── */
+    .bubble-area {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      min-height: 80px;
+      margin: 16px 0;
+      font-size: 16px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      color: var(--text);
+    }
+    .bubble-area.empty { color: var(--muted); font-style: italic; }
+    .bubble-area.loading { color: var(--muted); }
+
+    /* dots loading */
+    .dots::after {
+      content: '...';
+      animation: dots 1.2s steps(4, end) infinite;
+    }
+    @keyframes dots {
+      0%,20%  { content: '.'; }
+      40%     { content: '..'; }
+      60%,100%{ content: '...'; }
+    }
+
+    /* ── Action row ── */
+    .action-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    /* ── Edit area ── */
+    #editArea {
+      display: none;
+      margin-top: 16px;
+    }
+    #editArea textarea { min-height: 70px; }
+    #editArea .btn-row {
+      display: flex; gap: 10px; margin-top: 10px;
+    }
+
+    /* ── Examples list ── */
+    .example-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .example-body { flex: 1; }
+    .ex-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .ex-text {
+      font-size: 15px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .ex-arrow {
+      color: var(--green);
+      font-size: 20px;
+      padding-top: 14px;
+    }
+    .ex-delete {
+      padding: 6px;
+      color: var(--muted);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 18px;
+      border-radius: 6px;
+      transition: color .2s;
+    }
+    .ex-delete:hover { color: var(--red); }
+
+    /* empty state */
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 50px 20px;
+      font-size: 15px;
+    }
+    .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+
+    /* toast */
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--green);
+      color: #000;
+      padding: 12px 24px;
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+      z-index: 999;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* send row */
+    .send-row { display: flex; gap: 10px; }
+    .send-row textarea { min-height: 56px; flex: 1; resize: none; }
+
+    /* counter badge */
+    .badge {
+      display: inline-block;
+      background: var(--green);
+      color: #000;
+      border-radius: 100px;
+      padding: 1px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-right: 6px;
+    }
+
+    /* settings */
+    .setting-row { margin-bottom: 20px; }
+    .setting-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .export-row { display: flex; gap: 10px; }
+
+    hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">💬</div>
+    <span>הסוכן שלי</span>
+  </div>
+  <div class="bot-toggle">
+    <span id="botLabel">בוט כבוי</span>
+    <label class="switch">
+      <input type="checkbox" id="botSwitch" onchange="toggleBot()" />
+      <span class="slider"></span>
+    </label>
+  </div>
+</header>
+
+<nav>
+  <div class="tab active" onclick="switchTab('test', this)">🧪 בדיקה ואימון</div>
+  <div class="tab" onclick="switchTab('examples', this)">
+    📚 דוגמאות שמורות <span id="exCount" class="badge">0</span>
+  </div>
+  <div class="tab" onclick="switchTab('settings', this)">⚙️ הגדרות</div>
+</nav>
+
+<main>
+
+  <!-- ════ TAB: TEST ════ -->
+  <div id="tab-test" class="section active">
+
+    <div class="card">
+      <div class="card-title">שלח הודעת בדיקה לסוכן</div>
+      <div class="send-row">
+        <textarea id="msgInput" placeholder="כתוב פה הודעה כאילו מישהו שלח לך בוואטסאפ..."
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendTest();}"></textarea>
+        <button class="btn btn-green" onclick="sendTest()" id="sendBtn">שלח ▶</button>
+      </div>
+    </div>
+
+    <div class="card" id="responseCard" style="display:none">
+      <div class="card-title">תשובת הסוכן</div>
+      <div class="bubble-area" id="responseBox"></div>
+
+      <div class="action-row">
+        <button class="btn btn-green" onclick="saveGood()">✅ מעולה! שמור כדוגמה</button>
+        <button class="btn btn-outline" onclick="showEdit()">✏️ ערוך ושמור</button>
+        <button class="btn btn-outline" onclick="sendTest()">🔄 נסה שוב</button>
+      </div>
+
+      <div id="editArea">
+        <textarea id="editInput" placeholder="ערוך את התשובה כמו שאתה היית עונה..."></textarea>
+        <div class="btn-row">
+          <button class="btn btn-green" onclick="saveEdited()">💾 שמור דוגמה מתוקנת</button>
+          <button class="btn btn-outline" onclick="hideEdit()">ביטול</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════ TAB: EXAMPLES ════ -->
+  <div id="tab-examples" class="section">
+    <div class="card">
+      <div class="card-title">דוגמאות שמורות — הסוכן לומד מהן</div>
+      <div id="examplesList"></div>
+    </div>
+  </div>
+
+  <!-- ════ TAB: SETTINGS ════ -->
+  <div id="tab-settings" class="section">
+    <div class="card">
+      <div class="card-title">ספר לסוכן עליך</div>
+      <div class="setting-row">
+        <div class="setting-label">מידע אישי — מה הסוכן צריך לדעת עליך? (שם, גיל, תחומי עניין, סגנון דיבור...)</div>
+        <textarea id="personalInfo" rows="5"
+          placeholder="לדוגמה: קוראים לי דנה, בת 28, מתל אביב. מדברת בשפה לא פורמלית, הרבה קיצורים. שולחת הודעות קצרות. משתמשת לפעמים באמוג׳י. עובדת בהייטק."></textarea>
+      </div>
+      <button class="btn btn-green" onclick="saveSettings()">💾 שמור</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">גיבוי וייבוא דוגמאות</div>
+      <div class="setting-label">מומלץ לייצא גיבוי מדי פעם — הנתונים לא שמורים לצמיתות בשרת</div>
+      <div class="export-row">
+        <button class="btn btn-outline" onclick="exportData()">📤 ייצא גיבוי</button>
+        <label class="btn btn-outline" style="cursor:pointer;">
+          📥 ייבא גיבוי
+          <input type="file" accept=".json" style="display:none" onchange="importData(event)" />
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔗 כתובת Webhook לחיבור ב-Whapi</div>
+      <div class="setting-label">הכנס את הכתובת הזאת בהגדרות ה-Webhook ב-Whapi</div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <input type="text" id="webhookUrl" readonly style="background:#111; cursor:text;" />
+        <button class="btn btn-outline" onclick="copyWebhook()">העתק</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast">✅ נשמר!</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let data = { personalInfo: '', examples: [], botEnabled: false };
+let lastMsg = '';
+let lastReply = '';
+
+// ── Init ───────────────────────────────────────────────────────────────────
+async function init() {
+  const res = await fetch('/api/data');
+  data = await res.json();
+  document.getElementById('personalInfo').value = data.personalInfo || '';
+  document.getElementById('botSwitch').checked = !!data.botEnabled;
+  document.getElementById('botLabel').textContent = data.botEnabled ? 'בוט פעיל' : 'בוט כבוי';
+  document.getElementById('webhookUrl').value = location.origin + '/webhook';
+  renderExamples();
+}
+
+// ── Tabs ───────────────────────────────────────────────────────────────────
+function switchTab(name, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  el.classList.add('active');
+  if (name === 'examples') renderExamples();
+}
+
+// ── Send Test ──────────────────────────────────────────────────────────────
+async function sendTest() {
+  const msg = document.getElementById('msgInput').value.trim();
+  if (!msg) return;
+  lastMsg = msg;
+
+  document.getElementById('responseCard').style.display = 'block';
+  const box = document.getElementById('responseBox');
+  box.className = 'bubble-area loading';
+  box.innerHTML = '<span class="dots">חושב</span>';
+  document.getElementById('sendBtn').disabled = true;
+  hideEdit();
+
+  try {
+    const res = await fetch('/api/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg })
+    });
+    const json = await res.json();
+    lastReply = json.reply || json.error || 'שגיאה';
+    box.className = 'bubble-area';
+    box.textContent = lastReply;
+  } catch (e) {
+    box.className = 'bubble-area';
+    box.textContent = '❌ שגיאה בחיבור לשרת';
+  }
+  document.getElementById('sendBtn').disabled = false;
+}
+
+// ── Save ───────────────────────────────────────────────────────────────────
+function saveGood() {
+  if (!lastMsg || !lastReply) return;
+  addExample(lastMsg, lastReply);
+}
+
+function showEdit() {
+  document.getElementById('editArea').style.display = 'block';
+  document.getElementById('editInput').value = lastReply;
+  document.getElementById('editInput').focus();
+}
+
+function hideEdit() {
+  document.getElementById('editArea').style.display = 'none';
+}
+
+function saveEdited() {
+  const edited = document.getElementById('editInput').value.trim();
+  if (!edited || !lastMsg) return;
+  addExample(lastMsg, edited);
+  hideEdit();
+}
+
+async function addExample(input, output) {
+  data.examples = data.examples || [];
+  data.examples.push({ input, output, ts: Date.now() });
+  await save();
+  renderExamples();
+  toast('✅ דוגמה נשמרה!');
+}
+
+// ── Examples ───────────────────────────────────────────────────────────────
+function renderExamples() {
+  const list = document.getElementById('examplesList');
+  const count = document.getElementById('exCount');
+  const examples = data.examples || [];
+  count.textContent = examples.length;
+
+  if (examples.length === 0) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="icon">📭</div>
+      עדיין אין דוגמאות שמורות.<br>שלח הודעת בדיקה ושמור תשובות טובות!
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = examples.map((ex, i) => `
+    <div class="example-item">
+      <div class="example-body">
+        <div class="ex-label">הודעה שנכנסה</div>
+        <div class="ex-text">${esc(ex.input)}</div>
+        <div style="margin: 10px 0; color:var(--green); font-size:18px;">↓</div>
+        <div class="ex-label">תשובה שלמד</div>
+        <div class="ex-text" style="color:var(--green)">${esc(ex.output)}</div>
+      </div>
+      <button class="ex-delete" onclick="deleteExample(${i})" title="מחק">🗑</button>
+    </div>
+  `).join('');
+}
+
+async function deleteExample(i) {
+  data.examples.splice(i, 1);
+  await save();
+  renderExamples();
+  toast('🗑 נמחק');
+}
+
+// ── Settings ───────────────────────────────────────────────────────────────
+async function saveSettings() {
+  data.personalInfo = document.getElementById('personalInfo').value;
+  await save();
+  toast('✅ נשמר!');
+}
+
+async function toggleBot() {
+  data.botEnabled = document.getElementById('botSwitch').checked;
+  document.getElementById('botLabel').textContent = data.botEnabled ? 'בוט פעיל ✅' : 'בוט כבוי';
+  await save();
+  toast(data.botEnabled ? '🟢 הבוט הופעל!' : '🔴 הבוט כובה');
+}
+
+// ── Export / Import ────────────────────────────────────────────────────────
+function exportData() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'agent-backup.json';
+  a.click();
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      data = { ...data, ...imported };
+      await save();
+      document.getElementById('personalInfo').value = data.personalInfo || '';
+      renderExamples();
+      toast('✅ יובא בהצלחה!');
+    } catch {
+      alert('קובץ לא תקין');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function copyWebhook() {
+  navigator.clipboard.writeText(location.origin + '/webhook');
+  toast('📋 הועתק!');
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+async function save() {
+  await fetch('/api/data', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+}
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
