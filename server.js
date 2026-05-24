@@ -7,9 +7,9 @@ app.use(express.json());
 app.use(express.static('public'));
 
 const DATA_FILE = 'training.json';
+const MODEL = 'claude-haiku-4-5-20251001';
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-// זיכרון זמני לאימון
 const trainingState = {};
 
 function load() {
@@ -55,7 +55,7 @@ async function sendMsg(chatId, text) {
 
 async function getAiReply(data, message) {
   const r = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: MODEL,
     max_tokens: 400,
     system: buildPrompt(data),
     messages: [{ role: 'user', content: message }],
@@ -74,78 +74,57 @@ app.post('/api/test', async (req, res) => {
     const reply = await getAiReply(data, message);
     res.json({ reply });
   } catch (e) {
+    console.error(e);
     res.status(500).json({ error: e.message });
   }
 });
 
 app.post('/webhook', async (req, res) => {
   res.sendStatus(200);
-
   const msgs = req.body?.messages;
   if (!msgs) return;
 
   for (const msg of msgs) {
     if (msg.from_me) continue;
     if (msg.type !== 'text') continue;
-
     const text = msg.text?.body?.trim();
     const chatId = msg.chat_id;
     if (!text || !chatId) continue;
-
     const data = load();
 
-    // מצב אימון פעיל — מחכים לתגובת המשתמש
     if (trainingState[chatId]) {
       const { input, reply } = trainingState[chatId];
       delete trainingState[chatId];
-
       const approved = ['טוב', '✅', '👍', 'ok', 'כן', 'good'].includes(text.toLowerCase());
-
       if (approved) {
         data.examples.push({ input, output: reply, ts: Date.now() });
-        save(data);
-        await sendMsg(chatId, `✅ נשמר! (סה"כ ${data.examples.length} דוגמאות)`);
       } else {
         data.examples.push({ input, output: text, ts: Date.now() });
-        save(data);
-        await sendMsg(chatId, `✅ נשמרה התשובה המתוקנת! (סה"כ ${data.examples.length} דוגמאות)`);
       }
+      save(data);
+      await sendMsg(chatId, `✅ נשמר! (סה"כ ${data.examples.length} דוגמאות)`);
       continue;
     }
 
-    // פקודת אימון
     if (text.startsWith('אימון:')) {
       const testMsg = text.slice(6).trim();
-      if (!testMsg) {
-        await sendMsg(chatId, 'כתוב הודעה אחרי "אימון:"\nלדוגמה: אימון: מה קורה?');
-        continue;
-      }
-
+      if (!testMsg) { await sendMsg(chatId, 'כתוב הודעה אחרי "אימון:"'); continue; }
       try {
         const agentReply = await getAiReply(data, testMsg);
         trainingState[chatId] = { input: testMsg, reply: agentReply };
         setTimeout(() => delete trainingState[chatId], 5 * 60 * 1000);
-
-        await sendMsg(chatId,
-          `🤖 כך הסוכן היה עונה:\n\n"${agentReply}"\n\n──────────────\n👍 שלח "טוב" לשמור\n✏️ שלח את התשובה הנכונה לתקן`
-        );
-      } catch (e) {
-        await sendMsg(chatId, 'שגיאה: ' + e.message);
-      }
+        await sendMsg(chatId, `🤖 כך הסוכן היה עונה:\n\n"${agentReply}"\n\n──────────────\n👍 שלח "טוב" לשמור\n✏️ שלח את התשובה הנכונה לתקן`);
+      } catch (e) { await sendMsg(chatId, 'שגיאה: ' + e.message); }
       continue;
     }
 
-    // בוט רגיל
     if (!data.botEnabled) continue;
-
     try {
       const reply = await getAiReply(data, text);
       await sendMsg(chatId, reply);
-    } catch (e) {
-      console.error('Bot error:', e.message);
-    }
+    } catch (e) { console.error(e.message); }
   }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server on port ${PORT} | model: ${MODEL}`));
