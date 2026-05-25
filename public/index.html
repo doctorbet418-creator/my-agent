@@ -397,6 +397,33 @@
     </div>
 
     <div class="card">
+      <div class="card-title">📱 ייבוא שיחות וואטסאפ</div>
+      <div class="setting-label">ייצא שיחה מוואטסאפ (⋮ → ייצוא צ'אט → ללא מדיה) ואז העלה כאן. הבוט ילמד מהתשובות שלך.</div>
+
+      <div class="setting-row" style="margin-top:14px;">
+        <div class="setting-label">מה השם שלך בוואטסאפ? (בדיוק כמו שמופיע בשיחה)</div>
+        <input type="text" id="myWaName" placeholder='לדוגמה: דנה, Yossi, +972 50-...' />
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <label class="btn btn-green" style="cursor:pointer;">
+          📂 העלה קובץ שיחה (.txt)
+          <input type="file" accept=".txt" style="display:none" onchange="importWhatsapp(event)" />
+        </label>
+        <span id="waImportStatus" style="color:var(--muted); font-size:13px;"></span>
+      </div>
+
+      <div id="waPreview" style="display:none; margin-top:16px;">
+        <div class="setting-label">תצוגה מקדימה — <span id="waCount">0</span> זוגות שיחה נמצאו</div>
+        <div id="waSampleList" style="margin-top:8px;"></div>
+        <div style="margin-top:14px; display:flex; gap:10px;">
+          <button class="btn btn-green" onclick="confirmWaImport()">✅ ייבא הכל לדוגמאות</button>
+          <button class="btn btn-outline" onclick="cancelWaImport()">ביטול</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
       <div class="card-title">גיבוי וייבוא דוגמאות</div>
       <div class="setting-label">מומלץ לייצא גיבוי מדי פעם — הנתונים לא שמורים לצמיתות בשרת</div>
       <div class="export-row">
@@ -612,6 +639,91 @@ function toast(msg) {
   el.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ── WhatsApp Chat Importer ─────────────────────────────────────────────────
+let waPairs = [];
+
+function importWhatsapp(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const myName = document.getElementById('myWaName').value.trim();
+  if (!myName) { alert('נא להכניס את השם שלך בוואטסאפ קודם'); return; }
+
+  document.getElementById('waImportStatus').textContent = 'מנתח...';
+
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const lines = ev.target.result.split('\n');
+    // WhatsApp line format: [DD/MM/YYYY, HH:MM:SS] Name: message
+    // or without brackets: DD/MM/YYYY, HH:MM - Name: message
+    const lineRe = /^\[?[\d\/\., :]+\]?\s*[-–]?\s*(.+?):\s(.+)$/;
+    const parsed = [];
+    for (const line of lines) {
+      const m = line.match(lineRe);
+      if (!m) continue;
+      const sender = m[1].trim();
+      const text = m[2].trim();
+      if (text === '<Media omitted>' || text === 'תמונה הושמטה' || text.length < 1) continue;
+      parsed.push({ sender, text });
+    }
+
+    // Build pairs: other person's message → my reply
+    waPairs = [];
+    for (let i = 0; i < parsed.length - 1; i++) {
+      const curr = parsed[i];
+      const next = parsed[i + 1];
+      if (curr.sender !== myName && next.sender === myName) {
+        waPairs.push({ input: curr.text, output: next.text });
+      }
+    }
+
+    // remove duplicates
+    const seen = new Set();
+    waPairs = waPairs.filter(p => {
+      const k = p.input + '||' + p.output;
+      if (seen.has(k)) return false;
+      seen.add(k); return true;
+    });
+
+    document.getElementById('waImportStatus').textContent = '';
+    if (waPairs.length === 0) {
+      alert('לא נמצאו זוגות שיחה. בדוק שהשם מדויק כמו בוואטסאפ.');
+      return;
+    }
+
+    document.getElementById('waCount').textContent = waPairs.length;
+    // show up to 3 samples
+    const samples = waPairs.slice(0, 3);
+    document.getElementById('waSampleList').innerHTML = samples.map(p => `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;font-size:14px;">
+        <div style="color:var(--muted);font-size:11px;font-weight:700;margin-bottom:4px;">הודעה שנכנסה</div>
+        <div>${esc(p.input)}</div>
+        <div style="color:var(--green);margin:6px 0;">↓</div>
+        <div style="color:var(--muted);font-size:11px;font-weight:700;margin-bottom:4px;">התשובה שלך</div>
+        <div style="color:var(--green)">${esc(p.output)}</div>
+      </div>
+    `).join('') + (waPairs.length > 3 ? `<div style="color:var(--muted);font-size:13px;padding:6px 0">...ועוד ${waPairs.length - 3} זוגות</div>` : '');
+
+    document.getElementById('waPreview').style.display = 'block';
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+async function confirmWaImport() {
+  data.examples = data.examples || [];
+  const before = data.examples.length;
+  waPairs.forEach(p => data.examples.push({ input: p.input, output: p.output, ts: Date.now() }));
+  await save();
+  renderExamples();
+  cancelWaImport();
+  toast(`✅ יובאו ${data.examples.length - before} דוגמאות חדשות!`);
+}
+
+function cancelWaImport() {
+  waPairs = [];
+  document.getElementById('waPreview').style.display = 'none';
+  document.getElementById('waImportStatus').textContent = '';
 }
 
 // ── Boot ───────────────────────────────────────────────────────────────────
