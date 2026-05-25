@@ -67,11 +67,13 @@ app.get('/api/data', (req, res) => res.json(load()));
 app.post('/api/data', (req, res) => { save(req.body); res.json({ ok: true }); });
 
 app.post('/api/test', async (req, res) => {
-  const { message } = req.body;
+  const { message, noExamples } = req.body;
   if (!message) return res.status(400).json({ error: 'no message' });
   const data = load();
+  // noExamples=true means simulate "before training" (ignore saved examples)
+  const dataToUse = noExamples ? { ...data, examples: [] } : data;
   try {
-    const reply = await getAiReply(data, message);
+    const reply = await getAiReply(dataToUse, message);
     res.json({ reply });
   } catch (e) {
     console.error(e);
