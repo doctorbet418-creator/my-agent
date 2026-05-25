@@ -3,318 +3,126 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>סוכן וואטסאפ שלי</title>
+  <title>הסוכן שלי</title>
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0d0d0d;--surface:#161616;--card:#1e1e1e;--border:#2a2a2a;
+      --green:#25d366;--text:#f0f0f0;--muted:#777;--red:#e05a5a;
+    }
+    body{background:var(--bg);color:var(--text);font-family:'Heebo',sans-serif;min-height:100vh}
 
-    :root {
-      --bg: #0d0d0d;
-      --surface: #161616;
-      --card: #1e1e1e;
-      --border: #2a2a2a;
-      --green: #25d366;
-      --green-dim: #1a9e4a;
-      --text: #f0f0f0;
-      --muted: #777;
-      --red: #e05a5a;
-      --yellow: #f0c040;
-    }
+    header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 24px;
+      display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .logo{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:700}
+    .logo-icon{width:34px;height:34px;background:var(--green);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;font-size:17px}
+    .switch-wrap{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+    .switch{position:relative;display:inline-block;width:46px;height:24px}
+    .switch input{opacity:0;width:0;height:0}
+    .slider{position:absolute;cursor:pointer;inset:0;background:#333;border-radius:34px;transition:.3s}
+    .slider:before{position:absolute;content:"";height:16px;width:16px;right:4px;bottom:4px;
+      background:white;border-radius:50%;transition:.3s}
+    input:checked+.slider{background:var(--green)}
+    input:checked+.slider:before{transform:translateX(-22px)}
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Heebo', sans-serif;
-      min-height: 100vh;
-    }
+    nav{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px}
+    .tab{padding:13px 20px;cursor:pointer;font-size:14px;font-weight:500;color:var(--muted);
+      border-bottom:2px solid transparent;transition:all .2s;user-select:none}
+    .tab.active{color:var(--green);border-bottom-color:var(--green)}
+    .tab:hover:not(.active){color:var(--text)}
 
-    /* ── Header ── */
-    header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 18px 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 20px;
-      font-weight: 700;
-    }
-    .logo-icon {
-      width: 36px; height: 36px;
-      background: var(--green);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px;
-    }
+    main{max-width:800px;margin:0 auto;padding:28px 18px}
+    .section{display:none}.section.active{display:block}
 
-    /* bot toggle */
-    .bot-toggle {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-      color: var(--muted);
-    }
-    .switch {
-      position: relative; display: inline-block;
-      width: 48px; height: 26px;
-    }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider {
-      position: absolute; cursor: pointer;
-      inset: 0; background: #333; border-radius: 34px;
-      transition: .3s;
-    }
-    .slider:before {
-      position: absolute; content: "";
-      height: 18px; width: 18px;
-      right: 4px; bottom: 4px;
-      background: white; border-radius: 50%;
-      transition: .3s;
-    }
-    input:checked + .slider { background: var(--green); }
-    input:checked + .slider:before { transform: translateX(-22px); }
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:18px}
+    .card-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:14px}
 
-    /* ── Tabs ── */
-    nav {
-      display: flex;
-      gap: 0;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 0 28px;
-    }
-    .tab {
-      padding: 14px 22px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--muted);
-      border-bottom: 2px solid transparent;
-      transition: all .2s;
-      user-select: none;
-    }
-    .tab.active {
-      color: var(--green);
-      border-bottom-color: var(--green);
-    }
-    .tab:hover:not(.active) { color: var(--text); }
+    textarea,input[type=text]{width:100%;background:var(--surface);border:1px solid var(--border);
+      border-radius:10px;color:var(--text);font-family:'Heebo',sans-serif;font-size:15px;
+      padding:13px 15px;resize:vertical;outline:none;transition:border-color .2s}
+    textarea:focus,input[type=text]:focus{border-color:var(--green)}
+    textarea{min-height:76px}
 
-    /* ── Layout ── */
-    main { max-width: 780px; margin: 0 auto; padding: 32px 20px; }
+    .btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:9px;
+      font-family:'Heebo',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+    .btn-green{background:var(--green);color:#000}.btn-green:hover{background:#1fc55a;transform:translateY(-1px)}
+    .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+    .btn-outline:hover{border-color:var(--green);color:var(--green)}
+    .btn-red{background:transparent;border:1px solid var(--red);color:var(--red)}
+    .btn-red:hover{background:var(--red);color:#fff}
+    .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
 
-    .section { display: none; }
-    .section.active { display: block; }
+    .bubble{background:var(--surface);border:1px solid var(--border);border-radius:11px;
+      padding:16px;font-size:15px;line-height:1.6;white-space:pre-wrap;min-height:60px}
+    .bubble.muted{color:var(--muted);font-style:italic}
 
-    /* ── Cards ── */
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 20px;
-    }
-    .card-title {
-      font-size: 13px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--muted);
-      margin-bottom: 16px;
-    }
+    .send-row{display:flex;gap:10px}
+    .send-row textarea{min-height:52px;flex:1;resize:none}
 
-    /* ── Inputs ── */
-    textarea, input[type="text"] {
-      width: 100%;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      font-family: 'Heebo', sans-serif;
-      font-size: 15px;
-      padding: 14px 16px;
-      resize: vertical;
-      outline: none;
-      transition: border-color .2s;
-    }
-    textarea:focus, input[type="text"]:focus {
-      border-color: var(--green);
-    }
-    textarea { min-height: 80px; }
+    .badge{display:inline-block;background:var(--green);color:#000;border-radius:100px;
+      padding:1px 8px;font-size:12px;font-weight:700;margin-right:5px}
+    .badge-gray{background:var(--border);color:var(--muted)}
 
-    /* ── Buttons ── */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 11px 22px;
-      border-radius: 10px;
-      font-family: 'Heebo', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: all .2s;
-    }
-    .btn-green { background: var(--green); color: #000; }
-    .btn-green:hover { background: #1fc55a; transform: translateY(-1px); }
-    .btn-outline {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-    }
-    .btn-outline:hover { border-color: var(--green); color: var(--green); }
-    .btn-red { background: transparent; border: 1px solid var(--red); color: var(--red); }
-    .btn-red:hover { background: var(--red); color: #fff; }
-    .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+    /* compare grid */
+    .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+    .compare-box{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:16px}
+    .compare-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+      color:var(--muted);margin-bottom:8px}
+    .compare-text{font-size:15px;line-height:1.6;white-space:pre-wrap}
+    .compare-box.after{border-color:var(--green)}
+    .compare-box.after .compare-label{color:var(--green)}
 
-    /* ── Chat bubble area ── */
-    .bubble-area {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      min-height: 80px;
-      margin: 16px 0;
-      font-size: 16px;
-      line-height: 1.6;
-      white-space: pre-wrap;
-      color: var(--text);
-    }
-    .bubble-area.empty { color: var(--muted); font-style: italic; }
-    .bubble-area.loading { color: var(--muted); }
+    /* upload zone */
+    .upload-zone{border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;
+      cursor:pointer;transition:all .25s;position:relative}
+    .upload-zone:hover,.upload-zone.drag{border-color:var(--green);background:rgba(37,211,102,.05)}
+    .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .upload-zone .icon{font-size:36px;margin-bottom:10px}
+    .upload-zone p{color:var(--muted);font-size:14px;margin-top:6px}
 
-    /* dots loading */
-    .dots::after {
-      content: '...';
-      animation: dots 1.2s steps(4, end) infinite;
-    }
-    @keyframes dots {
-      0%,20%  { content: '.'; }
-      40%     { content: '..'; }
-      60%,100%{ content: '...'; }
-    }
+    /* file chips */
+    .file-chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface);
+      border:1px solid var(--border);border-radius:100px;padding:5px 12px;font-size:13px;margin:4px}
+    .file-chip .rm{cursor:pointer;color:var(--muted);font-size:16px;line-height:1}
+    .file-chip .rm:hover{color:var(--red)}
 
-    /* ── Action row ── */
-    .action-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
+    /* examples */
+    .ex-item{background:var(--surface);border:1px solid var(--border);border-radius:11px;
+      padding:14px 16px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start}
+    .ex-body{flex:1}
+    .ex-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+      color:var(--muted);margin-bottom:3px}
+    .ex-text{font-size:14px;line-height:1.5;white-space:pre-wrap}
+    .ex-del{padding:5px;color:var(--muted);cursor:pointer;background:none;border:none;
+      font-size:17px;border-radius:6px;transition:color .2s}
+    .ex-del:hover{color:var(--red)}
+    .empty-state{text-align:center;color:var(--muted);padding:44px 20px;font-size:15px}
+    .empty-state .icon{font-size:38px;margin-bottom:10px}
 
-    /* ── Edit area ── */
-    #editArea {
-      display: none;
-      margin-top: 16px;
-    }
-    #editArea textarea { min-height: 70px; }
-    #editArea .btn-row {
-      display: flex; gap: 10px; margin-top: 10px;
-    }
+    /* progress bar */
+    .progress-bar{height:6px;background:var(--border);border-radius:10px;overflow:hidden;margin-top:10px}
+    .progress-fill{height:100%;background:var(--green);border-radius:10px;transition:width .4s}
 
-    /* ── Examples list ── */
-    .example-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 18px;
-      margin-bottom: 12px;
-      display: flex;
-      gap: 14px;
-      align-items: flex-start;
-    }
-    .example-body { flex: 1; }
-    .ex-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
-    .ex-text {
-      font-size: 15px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-    }
-    .ex-arrow {
-      color: var(--green);
-      font-size: 20px;
-      padding-top: 14px;
-    }
-    .ex-delete {
-      padding: 6px;
-      color: var(--muted);
-      cursor: pointer;
-      background: none;
-      border: none;
-      font-size: 18px;
-      border-radius: 6px;
-      transition: color .2s;
-    }
-    .ex-delete:hover { color: var(--red); }
+    /* stats row */
+    .stats-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+    .stat-box{background:var(--card);border:1px solid var(--border);border-radius:10px;
+      padding:14px 18px;flex:1;min-width:120px;text-align:center}
+    .stat-num{font-size:28px;font-weight:900;color:var(--green)}
+    .stat-label{font-size:12px;color:var(--muted);margin-top:3px}
 
-    /* empty state */
-    .empty-state {
-      text-align: center;
-      color: var(--muted);
-      padding: 50px 20px;
-      font-size: 15px;
-    }
-    .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+    #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+      background:var(--green);color:#000;padding:11px 22px;border-radius:100px;
+      font-weight:600;font-size:14px;transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:999}
+    #toast.show{transform:translateX(-50%) translateY(0)}
 
-    /* toast */
-    #toast {
-      position: fixed;
-      bottom: 28px;
-      left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: var(--green);
-      color: #000;
-      padding: 12px 24px;
-      border-radius: 100px;
-      font-weight: 600;
-      font-size: 14px;
-      transition: transform .3s cubic-bezier(.34,1.56,.64,1);
-      z-index: 999;
-    }
-    #toast.show { transform: translateX(-50%) translateY(0); }
-
-    /* send row */
-    .send-row { display: flex; gap: 10px; }
-    .send-row textarea { min-height: 56px; flex: 1; resize: none; }
-
-    /* counter badge */
-    .badge {
-      display: inline-block;
-      background: var(--green);
-      color: #000;
-      border-radius: 100px;
-      padding: 1px 8px;
-      font-size: 12px;
-      font-weight: 700;
-      margin-right: 6px;
-    }
-
-    /* settings */
-    .setting-row { margin-bottom: 20px; }
-    .setting-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-    .export-row { display: flex; gap: 10px; }
-
-    hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+    .action-row{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+    .edit-area{display:none;margin-top:14px}
+    .edit-area .btn-row{display:flex;gap:9px;margin-top:9px}
+    .setting-label{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px}
+    .setting-row{margin-bottom:18px}
+    hr{border:none;border-top:1px solid var(--border);margin:18px 0}
   </style>
 </head>
 <body>
@@ -324,7 +132,7 @@
     <div class="logo-icon">💬</div>
     <span>הסוכן שלי</span>
   </div>
-  <div class="bot-toggle">
+  <div class="switch-wrap">
     <span id="botLabel">בוט כבוי</span>
     <label class="switch">
       <input type="checkbox" id="botSwitch" onchange="toggleBot()" />
@@ -334,399 +142,399 @@
 </header>
 
 <nav>
-  <div class="tab active" onclick="switchTab('test', this)">🧪 בדיקה ואימון</div>
-  <div class="tab" onclick="switchTab('examples', this)">
-    📚 דוגמאות שמורות <span id="exCount" class="badge">0</span>
-  </div>
-  <div class="tab" onclick="switchTab('settings', this)">⚙️ הגדרות</div>
+  <div class="tab active" onclick="switchTab('test',this)">🧪 בדיקה ואימון</div>
+  <div class="tab" onclick="switchTab('import',this)">📂 ייבוא שיחות <span id="exCount" class="badge badge-gray">0</span></div>
+  <div class="tab" onclick="switchTab('examples',this)">📚 דוגמאות שמורות</div>
+  <div class="tab" onclick="switchTab('settings',this)">⚙️ הגדרות</div>
 </nav>
 
 <main>
 
-  <!-- ════ TAB: TEST ════ -->
-  <div id="tab-test" class="section active">
+<!-- ══ TEST ══ -->
+<div id="tab-test" class="section active">
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num" id="statExamples">0</div><div class="stat-label">דוגמאות שנשמרו</div></div>
+    <div class="stat-box"><div class="stat-num" id="statFiles">0</div><div class="stat-label">קבצים יובאו</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">שלח הודעת בדיקה</div>
+    <div class="send-row">
+      <textarea id="msgInput" placeholder="כתוב פה הודעה כאילו מישהו שלח לך..."
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendTest()}"></textarea>
+      <button class="btn btn-green" onclick="sendTest()" id="sendBtn">שלח ▶</button>
+    </div>
+  </div>
+
+  <div class="card" id="responseCard" style="display:none">
+    <div class="card-title">תשובת הסוכן</div>
+    <div class="bubble" id="responseBox"></div>
+    <div class="action-row">
+      <button class="btn btn-green" onclick="saveGood()">✅ מעולה! שמור</button>
+      <button class="btn btn-outline" onclick="showEdit()">✏️ ערוך ושמור</button>
+      <button class="btn btn-outline" onclick="sendTest()">🔄 נסה שוב</button>
+    </div>
+    <div class="edit-area" id="editArea">
+      <textarea id="editInput" placeholder="כתוב איך אתה היית עונה..."></textarea>
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="saveEdited()">💾 שמור מתוקן</button>
+        <button class="btn btn-outline" onclick="hideEdit()">ביטול</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ IMPORT ══ -->
+<div id="tab-import" class="section">
+  <div class="card">
+    <div class="card-title">📱 ייצוא שיחות מוואטסאפ</div>
+    <div style="color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:16px">
+      בכל שיחה בוואטסאפ: לחץ על שם הקשר למעלה ← גלול למטה ← <strong style="color:var(--text)">ייצוא צ'אט</strong> ← <strong style="color:var(--text)">ללא מדיה</strong> ← שלח לעצמך
+    </div>
+    <div class="setting-row">
+      <div class="setting-label">מה השם שלך בוואטסאפ? (בדיוק כמו שמופיע בשיחה — חשוב!)</div>
+      <input type="text" id="myWaName" placeholder='למשל: Yossi או +972 50-123...' />
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">העלה קבצי שיחה (.txt) — כמה שרוצה</div>
+    <div class="upload-zone" id="uploadZone"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="handleDrop(event)">
+      <input type="file" accept=".txt" multiple onchange="handleFiles(this.files)" />
+      <div class="icon">📂</div>
+      <strong>גרור קבצים לכאן</strong>
+      <p>או לחץ לבחירת קבצים</p>
+    </div>
+
+    <div id="fileChips" style="margin-top:12px;min-height:10px"></div>
+
+    <div id="importStatus" style="display:none;margin-top:16px">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div id="importMsg" style="color:var(--muted);font-size:13px;margin-top:8px;text-align:center"></div>
+    </div>
+  </div>
+
+  <!-- Preview + compare after import -->
+  <div id="importResult" style="display:none">
+    <div class="card">
+      <div class="card-title">✅ יובאו בהצלחה</div>
+      <div class="stats-row" style="margin-bottom:0">
+        <div class="stat-box"><div class="stat-num" id="impCount">0</div><div class="stat-label">זוגות חדשים</div></div>
+        <div class="stat-box"><div class="stat-num" id="impTotal">0</div><div class="stat-label">סה"כ דוגמאות</div></div>
+        <div class="stat-box"><div class="stat-num" id="impFiles">0</div><div class="stat-label">קבצים</div></div>
+      </div>
+    </div>
 
     <div class="card">
-      <div class="card-title">שלח הודעת בדיקה לסוכן</div>
+      <div class="card-title">🔬 הוכחה שהבוט למד — השוואה לפני ואחרי</div>
+      <div style="color:var(--muted);font-size:13px;margin-bottom:14px">שלח הודעת בדיקה ותראה שהסגנון השתנה</div>
       <div class="send-row">
-        <textarea id="msgInput" placeholder="כתוב פה הודעה כאילו מישהו שלח לך בוואטסאפ..."
-          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendTest();}"></textarea>
-        <button class="btn btn-green" onclick="sendTest()" id="sendBtn">שלח ▶</button>
+        <textarea id="compareMsg" placeholder='לדוגמה: "מה קורה?" או "מה נשמע?"' style="min-height:48px;resize:none;flex:1"></textarea>
+        <button class="btn btn-green" onclick="runCompare()" id="compareBtn">השווה ▶</button>
       </div>
-    </div>
-
-    <div class="card" id="responseCard" style="display:none">
-      <div class="card-title">תשובת הסוכן</div>
-      <div class="bubble-area" id="responseBox"></div>
-
-      <div class="action-row">
-        <button class="btn btn-green" onclick="saveGood()">✅ מעולה! שמור כדוגמה</button>
-        <button class="btn btn-outline" onclick="showEdit()">✏️ ערוך ושמור</button>
-        <button class="btn btn-outline" onclick="sendTest()">🔄 נסה שוב</button>
-      </div>
-
-      <div id="editArea">
-        <textarea id="editInput" placeholder="ערוך את התשובה כמו שאתה היית עונה..."></textarea>
-        <div class="btn-row">
-          <button class="btn btn-green" onclick="saveEdited()">💾 שמור דוגמה מתוקנת</button>
-          <button class="btn btn-outline" onclick="hideEdit()">ביטול</button>
+      <div id="compareResult" style="display:none;margin-top:16px">
+        <div class="compare-grid">
+          <div class="compare-box">
+            <div class="compare-label">⚪ לפני האימון</div>
+            <div class="compare-text" id="compareBefore"></div>
+          </div>
+          <div class="compare-box after">
+            <div class="compare-label">🟢 אחרי האימון</div>
+            <div class="compare-text" id="compareAfter"></div>
+          </div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:9px">
+          <button class="btn btn-green" onclick="saveCompare()">✅ שמור את "אחרי" כדוגמה</button>
+          <button class="btn btn-outline" onclick="runCompare()">🔄 נסה שוב</button>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
+<!-- ══ EXAMPLES ══ -->
+<div id="tab-examples" class="section">
+  <div class="card">
+    <div class="card-title">דוגמאות שמורות — הסוכן לומד מהן</div>
+    <div id="examplesList"></div>
+  </div>
+</div>
+
+<!-- ══ SETTINGS ══ -->
+<div id="tab-settings" class="section">
+  <div class="card">
+    <div class="card-title">ספר לסוכן עליך</div>
+    <div class="setting-row">
+      <div class="setting-label">מידע אישי — שם, גיל, עיסוק, סגנון דיבור, אמוג'ים שמשתמש בהם...</div>
+      <textarea id="personalInfo" rows="5"
+        placeholder="לדוגמה: קוראים לי דנה, בת 28, מתל אביב. מדברת לא פורמלית, שולחת הודעות קצרות. משתמשת לפעמים בסמיילי. לא עונה מיד."></textarea>
+    </div>
+    <button class="btn btn-green" onclick="saveSettings()">💾 שמור</button>
   </div>
 
-  <!-- ════ TAB: EXAMPLES ════ -->
-  <div id="tab-examples" class="section">
-    <div class="card">
-      <div class="card-title">דוגמאות שמורות — הסוכן לומד מהן</div>
-      <div id="examplesList"></div>
+  <div class="card">
+    <div class="card-title">גיבוי</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-outline" onclick="exportData()">📤 ייצא גיבוי</button>
+      <label class="btn btn-outline" style="cursor:pointer">
+        📥 ייבא גיבוי
+        <input type="file" accept=".json" style="display:none" onchange="importBackup(event)" />
+      </label>
+      <button class="btn btn-red" onclick="clearAll()">🗑 מחק הכל</button>
     </div>
   </div>
 
-  <!-- ════ TAB: SETTINGS ════ -->
-  <div id="tab-settings" class="section">
-    <div class="card">
-      <div class="card-title">ספר לסוכן עליך</div>
-      <div class="setting-row">
-        <div class="setting-label">מידע אישי — מה הסוכן צריך לדעת עליך? (שם, גיל, תחומי עניין, סגנון דיבור...)</div>
-        <textarea id="personalInfo" rows="5"
-          placeholder="לדוגמה: קוראים לי דנה, בת 28, מתל אביב. מדברת בשפה לא פורמלית, הרבה קיצורים. שולחת הודעות קצרות. משתמשת לפעמים באמוג׳י. עובדת בהייטק."></textarea>
-      </div>
-      <button class="btn btn-green" onclick="saveSettings()">💾 שמור</button>
-    </div>
-
-    <div class="card">
-      <div class="card-title">📱 ייבוא שיחות וואטסאפ</div>
-      <div class="setting-label">ייצא שיחה מוואטסאפ (⋮ → ייצוא צ'אט → ללא מדיה) ואז העלה כאן. הבוט ילמד מהתשובות שלך.</div>
-
-      <div class="setting-row" style="margin-top:14px;">
-        <div class="setting-label">מה השם שלך בוואטסאפ? (בדיוק כמו שמופיע בשיחה)</div>
-        <input type="text" id="myWaName" placeholder='לדוגמה: דנה, Yossi, +972 50-...' />
-      </div>
-
-      <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-        <label class="btn btn-green" style="cursor:pointer;">
-          📂 העלה קובץ שיחה (.txt)
-          <input type="file" accept=".txt" style="display:none" onchange="importWhatsapp(event)" />
-        </label>
-        <span id="waImportStatus" style="color:var(--muted); font-size:13px;"></span>
-      </div>
-
-      <div id="waPreview" style="display:none; margin-top:16px;">
-        <div class="setting-label">תצוגה מקדימה — <span id="waCount">0</span> זוגות שיחה נמצאו</div>
-        <div id="waSampleList" style="margin-top:8px;"></div>
-        <div style="margin-top:14px; display:flex; gap:10px;">
-          <button class="btn btn-green" onclick="confirmWaImport()">✅ ייבא הכל לדוגמאות</button>
-          <button class="btn btn-outline" onclick="cancelWaImport()">ביטול</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">גיבוי וייבוא דוגמאות</div>
-      <div class="setting-label">מומלץ לייצא גיבוי מדי פעם — הנתונים לא שמורים לצמיתות בשרת</div>
-      <div class="export-row">
-        <button class="btn btn-outline" onclick="exportData()">📤 ייצא גיבוי</button>
-        <label class="btn btn-outline" style="cursor:pointer;">
-          📥 ייבא גיבוי
-          <input type="file" accept=".json" style="display:none" onchange="importData(event)" />
-        </label>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">🔗 כתובת Webhook לחיבור ב-Whapi</div>
-      <div class="setting-label">הכנס את הכתובת הזאת בהגדרות ה-Webhook ב-Whapi</div>
-      <div style="display:flex; gap:10px; align-items:center;">
-        <input type="text" id="webhookUrl" readonly style="background:#111; cursor:text;" />
-        <button class="btn btn-outline" onclick="copyWebhook()">העתק</button>
-      </div>
+  <div class="card">
+    <div class="card-title">🔗 Webhook לחיבור ב-Whapi</div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <input type="text" id="webhookUrl" readonly style="background:#111;cursor:text" />
+      <button class="btn btn-outline" onclick="copyWebhook()">העתק</button>
     </div>
   </div>
+</div>
 
 </main>
-
-<div id="toast">✅ נשמר!</div>
+<div id="toast"></div>
 
 <script>
-// ── State ──────────────────────────────────────────────────────────────────
-let data = { personalInfo: '', examples: [], botEnabled: false };
-let lastMsg = '';
-let lastReply = '';
+let data = { personalInfo:'', examples:[], botEnabled:false, filesImported:0 };
+let lastMsg='', lastReply='', compareBeforeText='', compareAfterText='', compareInputText='';
 
-// ── Init ───────────────────────────────────────────────────────────────────
+// ── Init ──────────────────────────────────────────────────────────────────
 async function init() {
   const res = await fetch('/api/data');
   data = await res.json();
   document.getElementById('personalInfo').value = data.personalInfo || '';
   document.getElementById('botSwitch').checked = !!data.botEnabled;
-  document.getElementById('botLabel').textContent = data.botEnabled ? 'בוט פעיל' : 'בוט כבוי';
+  document.getElementById('botLabel').textContent = data.botEnabled ? 'בוט פעיל ✅' : 'בוט כבוי';
   document.getElementById('webhookUrl').value = location.origin + '/webhook';
-  renderExamples();
+  updateStats();
 }
 
-// ── Tabs ───────────────────────────────────────────────────────────────────
+function updateStats() {
+  const n = (data.examples||[]).length;
+  const f = data.filesImported || 0;
+  document.getElementById('statExamples').textContent = n;
+  document.getElementById('statFiles').textContent = f;
+  document.getElementById('exCount').textContent = n;
+  document.getElementById('exCount').className = n > 0 ? 'badge' : 'badge badge-gray';
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
 function switchTab(name, el) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
   el.classList.add('active');
-  if (name === 'examples') renderExamples();
+  if (name==='examples') renderExamples();
 }
 
-// ── Send Test ──────────────────────────────────────────────────────────────
+// ── Test ──────────────────────────────────────────────────────────────────
 async function sendTest() {
   const msg = document.getElementById('msgInput').value.trim();
   if (!msg) return;
   lastMsg = msg;
-
-  document.getElementById('responseCard').style.display = 'block';
+  document.getElementById('responseCard').style.display='block';
   const box = document.getElementById('responseBox');
-  box.className = 'bubble-area loading';
-  box.innerHTML = '<span class="dots">חושב</span>';
-  document.getElementById('sendBtn').disabled = true;
+  box.className='bubble muted'; box.textContent='חושב...';
+  document.getElementById('sendBtn').disabled=true;
   hideEdit();
-
   try {
-    const res = await fetch('/api/test', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: msg })
-    });
-    const json = await res.json();
-    lastReply = json.reply || json.error || 'שגיאה';
-    box.className = 'bubble-area';
-    box.textContent = lastReply;
-  } catch (e) {
-    box.className = 'bubble-area';
-    box.textContent = '❌ שגיאה בחיבור לשרת';
-  }
-  document.getElementById('sendBtn').disabled = false;
+    const r = await fetch('/api/test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});
+    const j = await r.json();
+    lastReply = j.reply||j.error||'שגיאה';
+    box.className='bubble'; box.textContent=lastReply;
+  } catch(e){ box.className='bubble'; box.textContent='❌ שגיאה'; }
+  document.getElementById('sendBtn').disabled=false;
 }
 
-// ── Save ───────────────────────────────────────────────────────────────────
-function saveGood() {
-  if (!lastMsg || !lastReply) return;
-  addExample(lastMsg, lastReply);
-}
+function saveGood(){ if(lastMsg&&lastReply) addExample(lastMsg,lastReply); }
+function showEdit(){ document.getElementById('editArea').style.display='block'; document.getElementById('editInput').value=lastReply; document.getElementById('editInput').focus(); }
+function hideEdit(){ document.getElementById('editArea').style.display='none'; }
+function saveEdited(){ const v=document.getElementById('editInput').value.trim(); if(v&&lastMsg){addExample(lastMsg,v);hideEdit();} }
 
-function showEdit() {
-  document.getElementById('editArea').style.display = 'block';
-  document.getElementById('editInput').value = lastReply;
-  document.getElementById('editInput').focus();
-}
-
-function hideEdit() {
-  document.getElementById('editArea').style.display = 'none';
-}
-
-function saveEdited() {
-  const edited = document.getElementById('editInput').value.trim();
-  if (!edited || !lastMsg) return;
-  addExample(lastMsg, edited);
-  hideEdit();
-}
-
-async function addExample(input, output) {
-  data.examples = data.examples || [];
-  data.examples.push({ input, output, ts: Date.now() });
-  await save();
-  renderExamples();
+async function addExample(input,output){
+  data.examples=data.examples||[];
+  data.examples.push({input,output,ts:Date.now()});
+  await save(); updateStats(); renderExamples();
   toast('✅ דוגמה נשמרה!');
 }
 
-// ── Examples ───────────────────────────────────────────────────────────────
-function renderExamples() {
-  const list = document.getElementById('examplesList');
-  const count = document.getElementById('exCount');
-  const examples = data.examples || [];
-  count.textContent = examples.length;
-
-  if (examples.length === 0) {
-    list.innerHTML = `<div class="empty-state">
-      <div class="icon">📭</div>
-      עדיין אין דוגמאות שמורות.<br>שלח הודעת בדיקה ושמור תשובות טובות!
+// ── Examples ──────────────────────────────────────────────────────────────
+function renderExamples(){
+  const list=document.getElementById('examplesList');
+  const ex=data.examples||[];
+  if(!ex.length){ list.innerHTML='<div class="empty-state"><div class="icon">📭</div>אין דוגמאות עדיין.<br>ייבא שיחות או שמור תשובות מהבדיקה.</div>'; return; }
+  list.innerHTML=[...ex].reverse().map((e,ri)=>{
+    const i=ex.length-1-ri;
+    return `<div class="ex-item">
+      <div class="ex-body">
+        <div class="ex-label">הודעה נכנסת</div>
+        <div class="ex-text">${esc(e.input)}</div>
+        <div style="margin:8px 0;color:var(--green);font-size:18px">↓</div>
+        <div class="ex-label">תשובה שלמד</div>
+        <div class="ex-text" style="color:var(--green)">${esc(e.output)}</div>
+      </div>
+      <button class="ex-del" onclick="delExample(${i})">🗑</button>
     </div>`;
-    return;
+  }).join('');
+}
+
+async function delExample(i){ data.examples.splice(i,1); await save(); updateStats(); renderExamples(); toast('🗑 נמחק'); }
+
+// ── WhatsApp Import ───────────────────────────────────────────────────────
+let pendingFiles=[];
+
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag');
+  handleFiles(e.dataTransfer.files);
+}
+
+function handleFiles(files){
+  for(const f of files){
+    if(!pendingFiles.find(x=>x.name===f.name)) pendingFiles.push(f);
+  }
+  renderChips();
+  processAllFiles();
+}
+
+function renderChips(){
+  document.getElementById('fileChips').innerHTML=pendingFiles.map((f,i)=>
+    `<span class="file-chip">📄 ${esc(f.name)} <span class="rm" onclick="removeFile(${i})">×</span></span>`
+  ).join('');
+}
+
+function removeFile(i){ pendingFiles.splice(i,1); renderChips(); }
+
+async function processAllFiles(){
+  const myName=document.getElementById('myWaName').value.trim();
+  if(!myName){ toast('⚠️ הכנס קודם את השם שלך בוואטסאפ'); return; }
+  if(!pendingFiles.length) return;
+
+  const statusEl=document.getElementById('importStatus');
+  const msgEl=document.getElementById('importMsg');
+  const fillEl=document.getElementById('progressFill');
+  statusEl.style.display='block';
+
+  let totalNew=0;
+  for(let i=0;i<pendingFiles.length;i++){
+    const f=pendingFiles[i];
+    fillEl.style.width=Math.round((i/pendingFiles.length)*100)+'%';
+    msgEl.textContent=`מעבד ${i+1}/${pendingFiles.length}: ${f.name}`;
+    const pairs=await parseWaFile(f,myName);
+    pairs.forEach(p=>{ data.examples=data.examples||[]; data.examples.push({input:p.input,output:p.output,ts:Date.now()}); totalNew++; });
   }
 
-  list.innerHTML = examples.map((ex, i) => `
-    <div class="example-item">
-      <div class="example-body">
-        <div class="ex-label">הודעה שנכנסה</div>
-        <div class="ex-text">${esc(ex.input)}</div>
-        <div style="margin: 10px 0; color:var(--green); font-size:18px;">↓</div>
-        <div class="ex-label">תשובה שלמד</div>
-        <div class="ex-text" style="color:var(--green)">${esc(ex.output)}</div>
-      </div>
-      <button class="ex-delete" onclick="deleteExample(${i})" title="מחק">🗑</button>
-    </div>
-  `).join('');
-}
-
-async function deleteExample(i) {
-  data.examples.splice(i, 1);
+  fillEl.style.width='100%';
+  msgEl.textContent='שומר...';
+  data.filesImported=(data.filesImported||0)+pendingFiles.length;
   await save();
-  renderExamples();
-  toast('🗑 נמחק');
+
+  document.getElementById('impCount').textContent=totalNew;
+  document.getElementById('impTotal').textContent=(data.examples||[]).length;
+  document.getElementById('impFiles').textContent=pendingFiles.length;
+  document.getElementById('importResult').style.display='block';
+  statusEl.style.display='none';
+  updateStats();
+  pendingFiles=[];
+  renderChips();
+  toast(`✅ יובאו ${totalNew} דוגמאות חדשות!`);
 }
 
-// ── Settings ───────────────────────────────────────────────────────────────
-async function saveSettings() {
-  data.personalInfo = document.getElementById('personalInfo').value;
-  await save();
-  toast('✅ נשמר!');
-}
-
-async function toggleBot() {
-  data.botEnabled = document.getElementById('botSwitch').checked;
-  document.getElementById('botLabel').textContent = data.botEnabled ? 'בוט פעיל ✅' : 'בוט כבוי';
-  await save();
-  toast(data.botEnabled ? '🟢 הבוט הופעל!' : '🔴 הבוט כובה');
-}
-
-// ── Export / Import ────────────────────────────────────────────────────────
-function exportData() {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'agent-backup.json';
-  a.click();
-}
-
-function importData(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async ev => {
-    try {
-      const imported = JSON.parse(ev.target.result);
-      data = { ...data, ...imported };
-      await save();
-      document.getElementById('personalInfo').value = data.personalInfo || '';
-      renderExamples();
-      toast('✅ יובא בהצלחה!');
-    } catch {
-      alert('קובץ לא תקין');
-    }
-  };
-  reader.readAsText(file);
-}
-
-function copyWebhook() {
-  navigator.clipboard.writeText(location.origin + '/webhook');
-  toast('📋 הועתק!');
-}
-
-// ── Helpers ────────────────────────────────────────────────────────────────
-async function save() {
-  await fetch('/api/data', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
+function parseWaFile(file, myName){
+  return new Promise(resolve=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const lines=ev.target.result.split('\n');
+      const skipPhrases=['<Media omitted>','תמונה הושמטה','הודעה זו נמחקה',
+        'This message was deleted','audio omitted','video omitted',
+        'image omitted','sticker omitted','GIF omitted','document omitted'];
+      const parsed=[];
+      for(let rawLine of lines){
+        const line=rawLine.replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g,'').trim();
+        if(!line) continue;
+        let sender=null,text=null;
+        // [date, time] Name: msg
+        let m=line.match(/^\[[\d\s\/\\.]+,\s*[\d:]+\]\s*(.+?):\s(.+)$/);
+        if(m){sender=m[1].trim();text=m[2].trim();}
+        // date, time - Name: msg
+        if(!sender){m=line.match(/^[\d\/\\.]+,\s*[\d:]+\s*[-–]\s*(.+?):\s(.+)$/);if(m){sender=m[1].trim();text=m[2].trim();}}
+        // date time - Name: msg
+        if(!sender){m=line.match(/^[\d\/\\.]+ [\d:]+ [-–] (.+?):\s(.+)$/);if(m){sender=m[1].trim();text=m[2].trim();}}
+        if(!sender||!text) continue;
+        if(skipPhrases.some(s=>text.includes(s))) continue;
+        parsed.push({sender,text});
+      }
+      const pairs=[];
+      const seen=new Set();
+      for(let i=0;i<parsed.length-1;i++){
+        const curr=parsed[i],next=parsed[i+1];
+        if(curr.sender!==myName&&next.sender===myName){
+          const k=curr.text+'||'+next.text;
+          if(!seen.has(k)){seen.add(k);pairs.push({input:curr.text,output:next.text});}
+        }
+      }
+      resolve(pairs);
+    };
+    reader.readAsText(file,'utf-8');
   });
 }
 
-function esc(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+// ── Compare before/after ──────────────────────────────────────────────────
+async function runCompare(){
+  const msg=document.getElementById('compareMsg').value.trim();
+  if(!msg){toast('⚠️ כתוב הודעה להשוואה');return;}
+  compareInputText=msg;
+  document.getElementById('compareBtn').disabled=true;
+  document.getElementById('compareResult').style.display='none';
+
+  // "before" = no examples
+  const [before,after]=await Promise.all([
+    fetchReply(msg, true),
+    fetchReply(msg, false)
+  ]);
+
+  compareBeforeText=before;
+  compareAfterText=after;
+  document.getElementById('compareBefore').textContent=before;
+  document.getElementById('compareAfter').textContent=after;
+  document.getElementById('compareResult').style.display='block';
+  document.getElementById('compareBtn').disabled=false;
 }
 
-let toastTimer;
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
-}
-
-// ── WhatsApp Chat Importer ─────────────────────────────────────────────────
-let waPairs = [];
-
-function importWhatsapp(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const myName = document.getElementById('myWaName').value.trim();
-  if (!myName) { alert('נא להכניס את השם שלך בוואטסאפ קודם'); return; }
-
-  document.getElementById('waImportStatus').textContent = 'מנתח...';
-
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const lines = ev.target.result.split('\n');
-    // WhatsApp line format: [DD/MM/YYYY, HH:MM:SS] Name: message
-    // or without brackets: DD/MM/YYYY, HH:MM - Name: message
-    const lineRe = /^\[?[\d\/\., :]+\]?\s*[-–]?\s*(.+?):\s(.+)$/;
-    const parsed = [];
-    for (const line of lines) {
-      const m = line.match(lineRe);
-      if (!m) continue;
-      const sender = m[1].trim();
-      const text = m[2].trim();
-      if (text === '<Media omitted>' || text === 'תמונה הושמטה' || text.length < 1) continue;
-      parsed.push({ sender, text });
-    }
-
-    // Build pairs: other person's message → my reply
-    waPairs = [];
-    for (let i = 0; i < parsed.length - 1; i++) {
-      const curr = parsed[i];
-      const next = parsed[i + 1];
-      if (curr.sender !== myName && next.sender === myName) {
-        waPairs.push({ input: curr.text, output: next.text });
-      }
-    }
-
-    // remove duplicates
-    const seen = new Set();
-    waPairs = waPairs.filter(p => {
-      const k = p.input + '||' + p.output;
-      if (seen.has(k)) return false;
-      seen.add(k); return true;
+async function fetchReply(msg, noExamples){
+  try{
+    const r=await fetch('/api/test',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:msg, noExamples})
     });
-
-    document.getElementById('waImportStatus').textContent = '';
-    if (waPairs.length === 0) {
-      alert('לא נמצאו זוגות שיחה. בדוק שהשם מדויק כמו בוואטסאפ.');
-      return;
-    }
-
-    document.getElementById('waCount').textContent = waPairs.length;
-    // show up to 3 samples
-    const samples = waPairs.slice(0, 3);
-    document.getElementById('waSampleList').innerHTML = samples.map(p => `
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;font-size:14px;">
-        <div style="color:var(--muted);font-size:11px;font-weight:700;margin-bottom:4px;">הודעה שנכנסה</div>
-        <div>${esc(p.input)}</div>
-        <div style="color:var(--green);margin:6px 0;">↓</div>
-        <div style="color:var(--muted);font-size:11px;font-weight:700;margin-bottom:4px;">התשובה שלך</div>
-        <div style="color:var(--green)">${esc(p.output)}</div>
-      </div>
-    `).join('') + (waPairs.length > 3 ? `<div style="color:var(--muted);font-size:13px;padding:6px 0">...ועוד ${waPairs.length - 3} זוגות</div>` : '');
-
-    document.getElementById('waPreview').style.display = 'block';
-  };
-  reader.readAsText(file, 'utf-8');
+    const j=await r.json();
+    return j.reply||j.error||'שגיאה';
+  }catch(e){return 'שגיאה';}
 }
 
-async function confirmWaImport() {
-  data.examples = data.examples || [];
-  const before = data.examples.length;
-  waPairs.forEach(p => data.examples.push({ input: p.input, output: p.output, ts: Date.now() }));
-  await save();
-  renderExamples();
-  cancelWaImport();
-  toast(`✅ יובאו ${data.examples.length - before} דוגמאות חדשות!`);
+function saveCompare(){
+  if(compareInputText&&compareAfterText) addExample(compareInputText,compareAfterText);
 }
 
-function cancelWaImport() {
-  waPairs = [];
-  document.getElementById('waPreview').style.display = 'none';
-  document.getElementById('waImportStatus').textContent = '';
-}
+// ── Settings ──────────────────────────────────────────────────────────────
+async function saveSettings(){ data.personalInfo=document.getElementById('personalInfo').value; await save(); toast('✅ נשמר!'); }
+async function toggleBot(){ data.botEnabled=document.getElementById('botSwitch').checked; document.getElementById('botLabel').textContent=data.botEnabled?'בוט פעיל ✅':'בוט כבוי'; await save(); toast(data.botEnabled?'🟢 הבוט הופעל!':'🔴 הבוט כובה'); }
+function exportData(){ const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='agent-backup.json'; a.click(); }
+async function importBackup(e){ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=async ev=>{ try{ const imp=JSON.parse(ev.target.result); data={...data,...imp}; await save(); document.getElementById('personalInfo').value=data.personalInfo||''; updateStats(); renderExamples(); toast('✅ יובא!'); }catch{alert('קובץ לא תקין');} }; r.readAsText(f); }
+async function clearAll(){ if(!confirm('למחוק את כל הדוגמאות?')) return; data.examples=[]; data.filesImported=0; await save(); updateStats(); renderExamples(); toast('🗑 נמחק הכל'); }
+function copyWebhook(){ navigator.clipboard.writeText(location.origin+'/webhook'); toast('📋 הועתק!'); }
 
-// ── Boot ───────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────
+async function save(){ await fetch('/api/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+let _toast; function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(_toast); _toast=setTimeout(()=>el.classList.remove('show'),2300); }
+
 init();
 </script>
 </body>
